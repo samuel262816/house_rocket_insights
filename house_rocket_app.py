@@ -31,6 +31,20 @@ df = pd.read_csv('dataset/df_eda.csv')
 # FUNÇÕES
 # ------------------------------------------------------------------------------------------
 
+def sell_table( df_sell ):
+    st.header(':chart_with_upwards_trend: Sales Report')
+    df_sell_filtered = ( df_sell[ (df_sell['price'] < price_filter) & (df_sell['grade'] >= grade_filter) ]
+                                [['id', 'zipcode', 'season', 'median_price', 'price', 'sell_price', 'profit']] )
+    return df_sell_filtered
+
+
+def buy_table( df_buy ):
+    st.header(':chart_with_upwards_trend: Purchase Report')
+    df_buy_filtered = (df_buy[ (df_buy['price'] < price_filter) & (df_buy['grade'] >= grade_filter) ]
+                               [['id', 'zipcode', 'grade', 'view', 'median_price', 'price', ]] )
+    return df_buy_filtered
+
+
 def houses_grade_graph( df ):
     below_10 = df[ df['grade'] <= 10 ]['price'].mean()
     above_10 = df[ df['grade'] > 10 ]['price'].mean()
@@ -107,17 +121,27 @@ grade_filter = st.sidebar.slider(
 st.markdown( '# House Rocket Company')
 st.markdown('##### Welcome to House Rocket Data Analysis')
 st.markdown( """___""")
-   
-#Tabelas de compra ou venda
-if report_filter == 'Purchase Report':
-    st.header(':chart_with_upwards_trend: Purchase Report')
-    df_buy_filtered = df_buy[ (df_buy['price'] < price_filter) & (df_buy['grade'] >= grade_filter) ] [['id', 'zipcode', 'grade', 'view', 'median_price', 'price', ]]
-    st.dataframe( df_buy_filtered, width=800 )
 
-else:
-    st.header(':chart_with_upwards_trend: Sales Report')
-    df_sell_filtered = df_sell[ (df_sell['price'] < price_filter) & (df_sell['grade'] >= grade_filter) ] [['id', 'zipcode', 'season', 'median_price', 'price', 'sell_price', 'profit']]
-    st.dataframe( df_sell_filtered, width=800 )
+with st.container():
+    #Tabelas de compra
+    if report_filter == 'Purchase Report':
+        df_buy_filtered = buy_table( df_buy )
+        st.dataframe( df_buy_filtered, width=800 )
+
+        st.markdown( '### Investment:')
+        investment = df_buy_filtered['price'].sum()
+        st.metric( label= 'Value:', value = f'US$ {investment:,.2f}' )
+
+    #Tabelas de venda
+    else:
+        df_sell_filtered = sell_table( df_sell )
+        st.dataframe( df_sell_filtered, width=800 )
+
+        st.markdown( '### Profit:')
+        profit = df_sell_filtered['profit'].sum()
+        st.metric( label= 'Value:', value = f'US$ {profit:,.2f}' )
+            
+        
 
 st.markdown( """___""")
     
